@@ -42,4 +42,7 @@ def get_user_text(message):
         mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты:'
         bot.send_message(message.chat.id, mess, parse_mode='html')
         
+print("Test")
+
+
 bot.polling(none_stop=True)
