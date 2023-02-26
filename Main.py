@@ -20,7 +20,7 @@ def start(message):
 def get_user_text(message):
     mess=message.text
     
-    if message.text == "Serv":
+    if message.text == "Service":
         bot.send_message(message.chat.id, message, parse_mode='html')
     
     elif mess.isdigit():
@@ -34,15 +34,15 @@ def get_user_text(message):
 
     #elif mess.isdigit():
 
+    elif message.text == "Help":
+        bot.send_message(message.chat.id, "Доступны команды Service, Export", parse_mode='html')  
+
     elif message.text == "Export":
-        bot.send_message(message.chat.id, "Not working yet :()", parse_mode='html')
-        
+        bot.send_message(message.chat.id, "В данный момент времени эта функция недоступна :(", parse_mode='html')  
          
     else:
         mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты:'
         bot.send_message(message.chat.id, mess, parse_mode='html')
-        
-print("Test")
 
 
 bot.polling(none_stop=True)
