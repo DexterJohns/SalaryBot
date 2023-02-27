@@ -30,19 +30,23 @@ def get_user_text(message):
         str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
         str2 = "".join(line.strip() for line in str1.splitlines())
         rate = re.search(r"(\d).(\d{5})",str2) 
-        bot.send_message(message.chat.id, f"\nDate:                   {param_date} \nSalary $:              {message.text}  \nRate USD-EUR:  {rate.group(0)}", parse_mode='html')
-
+        bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {message.text}  \nRate USD-EUR:  {rate.group(0)}", parse_mode='html')
+        write_to_file(str(param_date),str(message.text),str(rate.group(0)))
+    
     #elif mess.isdigit():
 
-    elif message.text == "Help":
-        bot.send_message(message.chat.id, "Доступны команды Service, Export", parse_mode='html')  
-
-    elif message.text == "Export":
+    elif message.text == "/Export":
         bot.send_message(message.chat.id, "В данный момент времени эта функция недоступна :(", parse_mode='html')  
          
     else:
-        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты:'
+        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды Service и /Export"'
         bot.send_message(message.chat.id, mess, parse_mode='html')
+
+def write_to_file(date,money,rate):
+    f = open("replyes.txt", "a")
+    a=date; b=money; c=rate
+    f.write("{}  {}  {}\n".format(a, b, c))
+    f.close()
 
 
 bot.polling(none_stop=True)
