@@ -41,12 +41,30 @@ def get_user_text(message):
     else:
         mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды Service и /Export"'
         bot.send_message(message.chat.id, mess, parse_mode='html')
+        get_year_list(2024)
 
 def write_to_file(date,money,rate):
     f = open("replyes.txt", "a")
     a=date; b=money; c=rate
     f.write("{}  {}  {}\n".format(a, b, c))
     f.close()
+
+def get_year_list(year):
+    inputFile = "replyes.txt"
+    givenString = str(year)
+    year_list = ""
+    print('The following lines contain the string {', givenString, '}:')
+    # Opening the given file in read-only mode
+    with open(inputFile, 'r') as filedata:
+        # Traverse in each line of the file
+        for line in filedata:
+        # Checking whether the given string is found in the line data
+            if givenString in line:
+        # Print the line, if the given string is found in the current line
+                print(line.strip())
+
+                #print (year_list)
+#return years
 
 
 bot.polling(none_stop=True)
