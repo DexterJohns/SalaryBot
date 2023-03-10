@@ -31,7 +31,9 @@ def get_user_text(message):
         str2 = "".join(line.strip() for line in str1.splitlines())
         rate = re.search(r"(\d).(\d{5})",str2) 
         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {message.text}  \nRate USD-EUR:  {rate.group(0)}", parse_mode='html')
-        write_to_file(str(param_date),str(message.text),str(rate.group(0)))
+        #write_to_file(str(param_date),str(message.text),str(rate.group(0)))
+        write_to_file()
+        print('Записали в файл')
     
     #elif mess.isdigit():
 
@@ -43,16 +45,21 @@ def get_user_text(message):
         bot.send_message(message.chat.id, mess, parse_mode='html')
         get_year_list(2024)
 
-def write_to_file(date,money,rate):
-    f = open("replyes.txt", "a")
-    a=date; b=money; c=rate
-    f.write("{}  {}  {}\n".format(a, b, c))
+#def write_to_file(date,money,rate):
+#    f = open("replyes.txt", "a")
+#    a=date; b=money; c=rate
+#    f.write("{}  {}  {}\n".format(a, b, c))
+#    f.close()
+
+def write_to_file():
+    f = open("demofile2.txt", "a")
+    f.write("Now the file has more content! \n")
     f.close()
 
 def get_year_list(year):
     inputFile = "replyes.txt"
     givenString = str(year)
-    year_list = ""
+    year_list = ''
     print('The following lines contain the string {', givenString, '}:')
     # Opening the given file in read-only mode
     with open(inputFile, 'r') as filedata:
@@ -61,10 +68,12 @@ def get_year_list(year):
         # Checking whether the given string is found in the line data
             if givenString in line:
         # Print the line, if the given string is found in the current line
-                print(line.strip())
+                year_list=year_list+line.strip()+'\n'
+                #print(line.strip())
 
-                #print (year_list)
-#return years
+
+                print (year_list)
+#return year_list
 
 
 bot.polling(none_stop=True)
