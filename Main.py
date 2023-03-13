@@ -45,7 +45,9 @@ def get_user_text(message):
         #mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды Service и /Export"'
         #bot.send_message(message.chat.id, mess, parse_mode='html')
         #get_year_list(2024)
-        get_PRVA_rate()
+        #get_PRVA_rate()
+        #get_HIPO_rate()
+        get_NLB_rate()
 
 #def write_to_file(date,money,rate):
 #    f = open("replyes.txt", "a")
@@ -64,8 +66,17 @@ def get_PRVA_rate():
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
+    print(str2)
     #rate = re.search(r"\d",str3) 
     #print(rate.groups())
+
+def get_HIPO_rate():
+    url = "https://www.hipotekarnabanka.com/"
+    response = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(response.text, 'lxml')
+    str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
+    str2 = "".join(line.strip() for line in str1.splitlines())
+    print(str2)
 
 def get_year_list(year):
     inputFile = "replyes.txt"
