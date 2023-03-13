@@ -78,6 +78,16 @@ def get_HIPO_rate():
     str2 = "".join(line.strip() for line in str1.splitlines())
     print(str2)
 
+def get_NLB_rate():
+    url = "https://www.nlb.me/me/nlb-banka/kursna-lista"
+    response = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(response.text, 'lxml')
+    soupe = soup.find('tbody', class_="istok-700")
+    print(soupe)
+    #str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'Dollar' in tag.text)))
+    #str2 = "".join(line.strip() for line in str1.splitlines())
+    #print(str2)
+
 def get_year_list(year):
     inputFile = "replyes.txt"
     givenString = str(year)
