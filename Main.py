@@ -4,6 +4,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
+HEADERS = {'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
 
 bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
@@ -41,9 +42,10 @@ def get_user_text(message):
         bot.send_message(message.chat.id, "В данный момент времени эта функция недоступна :(", parse_mode='html')  
          
     else:
-        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды Service и /Export"'
-        bot.send_message(message.chat.id, mess, parse_mode='html')
-        get_year_list(2024)
+        #mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды Service и /Export"'
+        #bot.send_message(message.chat.id, mess, parse_mode='html')
+        #get_year_list(2024)
+        get_PRVA_rate()
 
 #def write_to_file(date,money,rate):
 #    f = open("replyes.txt", "a")
@@ -52,9 +54,23 @@ def get_user_text(message):
 #    f.close()
 
 def write_to_file():
-    f = open("demofile2.txt", "a")
+    f = open("Salary_log.txt", "a")
     f.write("Now the file has more content! \n")
     f.close()
+
+def get_PRVA_rate():
+    url = "https://www.prvabankacg.com/index.php"
+    response = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(response.text, 'lxml')
+    str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
+    str2 = "".join(line.strip() for line in str1.splitlines())
+    #rate = re.search(r"\d",str3) 
+    #print(rate.groups())
+
+def get_PRVA_rate():
+    base_url = "https://www.prvabankacg.com/index.php"
+    r= requests.get(base_url)
+    soup = BeautifulSoup(r.content, "html.parser")
 
 def get_year_list(year):
     inputFile = "replyes.txt"
