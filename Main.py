@@ -67,11 +67,6 @@ def get_PRVA_rate():
     #rate = re.search(r"\d",str3) 
     #print(rate.groups())
 
-def get_PRVA_rate():
-    base_url = "https://www.prvabankacg.com/index.php"
-    r= requests.get(base_url)
-    soup = BeautifulSoup(r.content, "html.parser")
-
 def get_year_list(year):
     inputFile = "replyes.txt"
     givenString = str(year)
