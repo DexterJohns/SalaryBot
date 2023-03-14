@@ -9,6 +9,7 @@ HEADERS = {'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWeb
 bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
 param_date=raw_date.strftime("%Y-%m-%d")
+regex = re.compile(r'<[^>]+>')
 
 
 @bot.message_handler(commands=['start'])
@@ -46,8 +47,8 @@ def get_user_text(message):
         #bot.send_message(message.chat.id, mess, parse_mode='html')
         #get_year_list(2024)
         get_PRVA_rate()
-        get_HIPO_rate()
         get_LOVCEN_rate()
+        get_HIPO_rate()
         #get_ERSTE_rate()
         #get_NLB_rate()
         
@@ -63,13 +64,20 @@ def write_to_file():
     f.write("Now the file has more content! \n")
     f.close()
 
+def remove_html(string):
+    return regex.sub(' ', string)
+
 def get_PRVA_rate():
     url = "https://www.prvabankacg.com/index.php"
     response = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
-    print(str2)
+    str3 = remove_html(str2)
+    print(str3)
+    #print(type(str2))
+    re.findall(r"[-+]?(?:\d*\.*\d+)", str2)
+    
     #rate = re.search(r"\d",str3) 
     #print(rate.groups())
 
@@ -79,7 +87,8 @@ def get_LOVCEN_rate():
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
-    print(str2)
+    str3 = remove_html(str2)
+    print(str3)
     #rate = re.search(r"\d",str3) 
     #print(rate.groups())
 
@@ -89,7 +98,8 @@ def get_HIPO_rate():
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
-    print(str2)
+    str3 = remove_html(str2)
+    print(str3)
 
 def get_ERSTE_rate():
     url = "https://www.erstebank.me/sr_ME/stanovnistvo/Alati/kursna-lista"
