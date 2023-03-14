@@ -9,7 +9,7 @@ HEADERS = {'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWeb
 bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
 param_date=raw_date.strftime("%Y-%m-%d")
-regex = re.compile(r'<[^>]+>')
+
 
 
 @bot.message_handler(commands=['start'])
@@ -22,8 +22,9 @@ def start(message):
 def get_user_text(message):
     mess=message.text
     
-    if message.text == "Service":
+    if message.text == ":Srv":
         bot.send_message(message.chat.id, message, parse_mode='html')
+
     
     elif mess.isdigit():
         base_url = "https://www.cbcg.me/en/core-functions/financial-and-banking-operations/fx-reference-rates?vazi_od=" + param_date
@@ -33,22 +34,19 @@ def get_user_text(message):
         str2 = "".join(line.strip() for line in str1.splitlines())
         rate = re.search(r"(\d).(\d{5})",str2) 
         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {message.text}  \nRate USD-EUR:  {rate.group(0)}", parse_mode='html')
-        #write_to_file(str(param_date),str(message.text),str(rate.group(0)))
         write_to_file()
         print('Записали в файл')
-    
-    #elif mess.isdigit():
 
-    elif message.text == "/Export":
-        bot.send_message(message.chat.id, "В данный момент времени эта функция недоступна :(", parse_mode='html')  
+    elif message.text == "/Rate":
+        bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:  \nNLB: ", parse_mode='html')
          
     else:
-        #mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды Service и /Export"'
-        #bot.send_message(message.chat.id, mess, parse_mode='html')
+        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды :Srv и /Rate"'
+        bot.send_message(message.chat.id, mess, parse_mode='html')
         #get_year_list(2024)
-        get_PRVA_rate()
-        get_LOVCEN_rate()
-        get_HIPO_rate()
+        #get_PRVA_rates()
+        #get_LOVCEN_rates()
+        #get_HIPO_rates()
         #get_ERSTE_rate()
         #get_NLB_rate()
         
@@ -64,61 +62,69 @@ def write_to_file():
     f.write("Now the file has more content! \n")
     f.close()
 
-def remove_html(string):
-    return regex.sub(' ', string)
 
-def get_PRVA_rate():
+
+def get_rate_list(string):
+    regex = re.compile(r'<[^>]+>')
+    rate_list = regex.sub(' ', string)
+    letterless = re.sub(r"[a-zA-Z]+", '' ,rate_list)
+    stripped = letterless.strip()
+    pre_list = " ".join(stripped.split())
+    list = pre_list.split(" ")
+    return list
+
+def get_PRVA_rates():
     url = "https://www.prvabankacg.com/index.php"
     response = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
-    str3 = remove_html(str2)
-    print(str3)
-    #print(type(str2))
-    re.findall(r"[-+]?(?:\d*\.*\d+)", str2)
-    
-    #rate = re.search(r"\d",str3) 
-    #print(rate.groups())
+    str3 = get_rate_list(str2)
+    rate = str3[0]
+    return rate
 
-def get_LOVCEN_rate():
+def get_LOVCEN_rates():
     url = "https://lovcenbanka.me/me/"
     response = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
-    str3 = remove_html(str2)
-    print(str3)
-    #rate = re.search(r"\d",str3) 
-    #print(rate.groups())
+    str3 = get_rate_list(str2)
+    rate = str3[0]
+    return rate
 
-def get_HIPO_rate():
+def get_HIPO_rates():
     url = "https://www.hipotekarnabanka.com/"
     response = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(response.text, 'lxml')
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
-    str3 = remove_html(str2)
-    print(str3)
+    str3 = get_rate_list(str2)
+    rate = str3[0]
+    return rate
 
-def get_ERSTE_rate():
+def get_ERSTE_rates():
     url = "https://www.erstebank.me/sr_ME/stanovnistvo/Alati/kursna-lista"
     response = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = BeautifulSoup(response.text, 'html.parser')
     soup.prettify()
    # str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'strong' and 'USD' in tag.text)))
     #str2 = "".join(line.strip() for line in str1.splitlines())
     print(soup)
+    return rate
 
-def get_NLB_rate():
+def get_NLB_rates():
     url = "https://www.nlb.me/me/nlb-banka/kursna-lista"
-    response = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(response.text, html.parser)
-    soupe = soup.find_all('class')
-    print(soupe)
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    #str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'td' and 'Američki Dolar' in tag.name)))
+    #soupe = soup.find_all('class')
+    str2 = soup.find_all(lambda tag: len(tag.find_all()) == 0 and "Dollar" in tag.text)
+    print(soup)
     #str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'Dollar' in tag.text)))
     #str2 = "".join(line.strip() for line in str1.splitlines())
     #print(str2)
+    return rate
 
 def get_year_list(year):
     inputFile = "replyes.txt"
@@ -137,7 +143,7 @@ def get_year_list(year):
 
 
                 print (year_list)
-#return year_list
+    #return year_list
 
 
 bot.polling(none_stop=True)
