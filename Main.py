@@ -38,7 +38,7 @@ def get_user_text(message):
         print('Записали в файл')
 
     elif message.text == "/Rate":
-        bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:  \nNLB: ", parse_mode='html')
+        bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
          
     else:
         mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды :Srv и /Rate"'
@@ -47,22 +47,14 @@ def get_user_text(message):
         #get_PRVA_rates()
         #get_LOVCEN_rates()
         #get_HIPO_rates()
-        #get_ERSTE_rate()
-        #get_NLB_rate()
+        #get_ERSTE_rates()
+        get_NLB_rates()
         
-
-#def write_to_file(date,money,rate):
-#    f = open("replyes.txt", "a")
-#    a=date; b=money; c=rate
-#    f.write("{}  {}  {}\n".format(a, b, c))
-#    f.close()
 
 def write_to_file():
     f = open("Salary_log.txt", "a")
     f.write("Now the file has more content! \n")
     f.close()
-
-
 
 def get_rate_list(string):
     regex = re.compile(r'<[^>]+>')
@@ -104,26 +96,27 @@ def get_HIPO_rates():
     return rate
 
 def get_ERSTE_rates():
-    url = "https://www.erstebank.me/sr_ME/stanovnistvo/Alati/kursna-lista"
-    response = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    soup.prettify()
-   # str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'strong' and 'USD' in tag.text)))
-    #str2 = "".join(line.strip() for line in str1.splitlines())
-    print(soup)
+    url = "https://local.erstebank.hr/rproxy/webdocapi/ebmn/fx/current"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'lxml')
+    str1 = "".join(map(str,soup.find(string=re.compile("USD"))))
+    str2 = str1.replace("},{","}\n{")
+    str3 = str2.split("\n")
+    str4 = str3[3]
+    str5 = re.findall(r"\d+\.\d+", str4)
+    rate = str5[0]
     return rate
 
 def get_NLB_rates():
-    url = "https://www.nlb.me/me/nlb-banka/kursna-lista"
+    url = "https://api.nlb.me/v1/exchange-rates/latest?extended_fields=currencies"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    #str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'td' and 'Američki Dolar' in tag.name)))
-    #soupe = soup.find_all('class')
-    str2 = soup.find_all(lambda tag: len(tag.find_all()) == 0 and "Dollar" in tag.text)
-    print(soup)
-    #str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'Dollar' in tag.text)))
-    #str2 = "".join(line.strip() for line in str1.splitlines())
-    #print(str2)
+    str1 = "".join(map(str,soup.find(string=re.compile("USD"))))
+    str2 = str1.replace("},{","}\n{")
+    str3 = str2.split("\n")
+    str4 = str3[10]
+    str5 = re.findall(r"\d+\.\d+", str4)
+    rate = str5[0]
     return rate
 
 def get_year_list(year):
