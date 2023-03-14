@@ -38,7 +38,7 @@ def get_user_text(message):
         print('Записали в файл')
 
     elif message.text == "/Rate":
-        bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
+        bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}\nZIRA:    {get_ZIRAAT_rates()}", parse_mode='html')
          
     else:
         mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды :Srv и /Rate"'
@@ -48,7 +48,9 @@ def get_user_text(message):
         #get_LOVCEN_rates()
         #get_HIPO_rates()
         #get_ERSTE_rates()
-        get_NLB_rates()
+        #get_NLB_rates()
+        #get_CKB_rates()
+        get_ZIRAAT_rates()
         
 
 def write_to_file():
@@ -118,6 +120,30 @@ def get_NLB_rates():
     str5 = re.findall(r"\d+\.\d+", str4)
     rate = str5[0]
     return rate
+
+def get_ZIRAAT_rates():
+    url = "https://www.ziraatbank.me/tr/GetCurrency"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'lxml')
+    str1 = "".join(map(str,soup.find(string=re.compile("USD"))))
+    str2 = str1.replace("},{","}\n{")
+    str3 = str2.split("\n")
+    str4 = str3[27]
+    str5 = re.findall(r"\d+\.\d+", str4)
+    rate = str5[0]
+    return rate
+
+def get_CKB_rates():
+    url = "https://www.ckb.me/gradjani/gradjani-home"
+    response = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(response.text, 'lxml')
+    txt = soup.find("div", class_="rate")
+    print(txt)
+    #str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
+    #str2 = "".join(line.strip() for line in str1.splitlines())
+    #str3 = get_rate_list(str2)
+    #rate = str3[0]
+    #return rate
 
 def get_year_list(year):
     inputFile = "replyes.txt"
