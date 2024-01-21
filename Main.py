@@ -15,7 +15,7 @@ param_date=raw_date.strftime("%Y-%m-%d")
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    mess = f'<b>{message.from_user.first_name}, тут доступны команды :Srv и /Rate; \n \nВведи целую часть полученной зарплаты:</b>'
+    mess = f'<b>{message.from_user.first_name}, тут доступны команды :Srv /Rate /List; \n \nВведи целую часть полученной зарплаты:</b>'
     bot.send_message(message.chat.id, mess, parse_mode='html')
 
 
@@ -23,13 +23,14 @@ def start(message):
 def get_user_text(message):
     mess=message.text
     
-    if message.text == ":Srv":
+    if message.text == "/Srv":
         bot.send_message(message.chat.id, message, 'lxml')
 
     
     elif mess.isdigit():
          global salary
          global rate
+         global data
          salary = message.text
         #print (param_date)
          base_url = "https://www.cbcg.me/en/core-functions/financial-and-banking-operations/fx-reference-rates?vazi_od=" + param_date
@@ -46,22 +47,36 @@ def get_user_text(message):
          bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary}  \nRate USD-EUR:  {rate}", parse_mode='html')
          write_to_file()
          print('Записали в файл')
+         
+
+         
 
     elif message.text == "/Rate":
         #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
         bot.send_message(message.from_user.id, f"For 1$ u'll get: \n\nPRVA:   {get_PRVA_rates()} \u20ac \nLOVC:  {get_LOVCEN_rates()} \u20ac \nHIPO:   {get_HIPO_rates()} \u20ac \nNLB:    {get_NLB_rates()} \u20ac", parse_mode='html')
-         
+
+    elif message.text == "/List":
+        with open('Salary_log.txt') as f:
+            contents = f.read()
+        bot.send_message(message.from_user.id, f"{contents}", parse_mode='html')
+
+    elif message.text == "/rm":
+        with open('Salary_log.txt') as f:
+            lines = f.readlines()
+            del lines[-1:]
+        bot.send_message(message.from_user.id, f"Last record was deleted", parse_mode='html')
+    
     else:
-        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа и некоторые команды, введи целую часть полученной зарплаты. Также доступны команды :Srv и /Rate"'
+        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа и некоторые команды, введи целую часть полученной зарплаты. Также доступны команды /Srv /Rate /List"'
         bot.send_message(message.chat.id, mess, parse_mode='html')
         #get_year_list(2024)
-        get_PRVA_rates()
-        get_LOVCEN_rates()
-        get_HIPO_rates()
+        #get_PRVA_rates()
+        #get_LOVCEN_rates()
+        #get_HIPO_rates()
         #get_ERSTE_rates() NOPE!!!
-        get_NLB_rates()
+        #get_NLB_rates()
         #get_CKB_rates() NOPE!!!
-        get_ZIRAAT_rates()
+        #get_ZIRAAT_rates()
         
 
 def write_to_file():
@@ -74,6 +89,7 @@ def write_to_file():
     file.write(str(rate))
     file.write('\n')
     file.close()
+
 
 def get_rate_list(string):
     regex = re.compile(r'<[^>]+>')
