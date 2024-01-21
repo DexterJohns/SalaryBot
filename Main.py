@@ -33,13 +33,13 @@ def get_user_text(message):
          print (base_url)
          r= requests.get(base_url, verify=False, timeout=5)
          soup = BeautifulSoup(r.content, "html.parser")
-         print (soup)
+         #print (soup)
          str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
          str2 = "".join(line.strip() for line in str1.splitlines())
          rate = re.search(r"(\d).(\d{5})",str2) 
          bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {message.text}  \nRate USD-EUR:  {rate.group(0)}", parse_mode='html')
- #       write_to_file()
- #       print('Записали в файл')
+         write_to_file(rate)
+         print('Записали в файл')
 
     elif message.text == "/Rate":
         #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
