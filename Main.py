@@ -15,7 +15,7 @@ param_date=raw_date.strftime("%Y-%m-%d")
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    mess = f'<b>{message.from_user.first_name}, тут доступны команды :Srv /Rate /List; \n \nВведи целую часть полученной зарплаты:</b>'
+    mess = f'<b>{message.from_user.first_name}, тут доступны команды /srv /rate /list /rm; \n \nВведи целую часть полученной зарплаты:</b>'
     bot.send_message(message.chat.id, mess, parse_mode='html')
 
 
@@ -23,7 +23,7 @@ def start(message):
 def get_user_text(message):
     mess=message.text
     
-    if message.text == "/Srv":
+    if message.text == "/srv":
         bot.send_message(message.chat.id, message, 'lxml')
 
     
@@ -51,23 +51,21 @@ def get_user_text(message):
 
          
 
-    elif message.text == "/Rate":
+    elif message.text == "/rate":
         #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
         bot.send_message(message.from_user.id, f"For 1$ u'll get: \n\nPRVA:   {get_PRVA_rates()} \u20ac \nLOVC:  {get_LOVCEN_rates()} \u20ac \nHIPO:   {get_HIPO_rates()} \u20ac \nNLB:    {get_NLB_rates()} \u20ac", parse_mode='html')
 
-    elif message.text == "/List":
+    elif message.text == "/list":
         with open('Salary_log.txt') as f:
             contents = f.read()
         bot.send_message(message.from_user.id, f"{contents}", parse_mode='html')
-
-    elif message.text == "/rm":
-        with open('Salary_log.txt') as f:
-            lines = f.readlines()
-            del lines[-1:]
-        bot.send_message(message.from_user.id, f"Last record was deleted", parse_mode='html')
     
+    elif message.text == "/rm":
+        remove_last_record()
+        bot.send_message(message.from_user.id, f"Last record was deleted", parse_mode='html')
+
     else:
-        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа и некоторые команды, введи целую часть полученной зарплаты. Также доступны команды /Srv /Rate /List"'
+        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа и некоторые команды, введи целую часть полученной зарплаты. Также доступны команды /srv /rate /list /rm"'
         bot.send_message(message.chat.id, mess, parse_mode='html')
         #get_year_list(2024)
         #get_PRVA_rates()
@@ -90,6 +88,23 @@ def write_to_file():
     file.write('\n')
     file.close()
 
+def remove_last_record():
+    with open(r"Salary_log.txt", 'r+') as fp:
+    # read an store all lines into list
+        lines = fp.readlines()
+        x = len(lines)
+        print(x)
+         # move file pointer to the beginning of a file
+        fp.seek(0)
+        # truncate the file
+        fp.truncate()
+        # start writing lines
+        # iterate line and line number
+        for number, line in enumerate(lines):
+          # delete line number 5 and 8
+          # note: list index start from 0
+            if number not in [x-1]:
+                fp.write(line)
 
 def get_rate_list(string):
     regex = re.compile(r'<[^>]+>')
