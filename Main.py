@@ -1,14 +1,15 @@
 import telebot
-import datetime
 import requests
 import re
 from bs4 import BeautifulSoup
+import datetime
 
 HEADERS = {'User-Agent': 'Mozilla/4.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
 
 bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
 param_date=raw_date.strftime("%Y-%m-%d")
+
 
 
 
@@ -27,6 +28,9 @@ def get_user_text(message):
 
     
     elif mess.isdigit():
+         global salary
+         global rate
+         salary = message.text
         #print (param_date)
          base_url = "https://www.cbcg.me/en/core-functions/financial-and-banking-operations/fx-reference-rates?vazi_od=" + param_date
          #base_url = "https://www.cbcg.me/download.php?date=" + param_date
@@ -34,11 +38,13 @@ def get_user_text(message):
          r= requests.get(base_url, verify=False, timeout=5)
          soup = BeautifulSoup(r.content, "html.parser")
          #print (soup)
+        
          str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
          str2 = "".join(line.strip() for line in str1.splitlines())
-         rate = re.search(r"(\d).(\d{5})",str2) 
-         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {message.text}  \nRate USD-EUR:  {rate.group(0)}", parse_mode='html')
-         write_to_file(rate)
+         str3 = re.search(r"(\d).(\d{5})",str2) 
+         rate = str3.group(0)
+         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary}  \nRate USD-EUR:  {rate}", parse_mode='html')
+         write_to_file()
          print('Записали в файл')
 
     elif message.text == "/Rate":
@@ -59,9 +65,15 @@ def get_user_text(message):
         
 
 def write_to_file():
-    f = open("Salary_log.txt", "a")
-    f.write("Now the file has more content! \n")
-    f.close()
+    file = open('Salary_log.txt', "a")
+    #current_datetime = datetime.now()
+    file.write(str(param_date))
+    file.write('  ')
+    file.write(str(salary))
+    file.write('  ')
+    file.write(str(rate))
+    file.write('\n')
+    file.close()
 
 def get_rate_list(string):
     regex = re.compile(r'<[^>]+>')
