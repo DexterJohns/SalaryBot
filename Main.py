@@ -4,7 +4,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
-#HEADERS = {'User-Agent': 'Mozilla/4.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
+HEADERS = {'User-Agent': 'Mozilla/4.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
 
 bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
@@ -14,7 +14,7 @@ param_date=raw_date.strftime("%Y-%m-%d")
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    mess = f'<b>{message.from_user.first_name}, введи целую часть полученной зарплаты:</b>'
+    mess = f'<b>{message.from_user.first_name}, тут доступны команды :Srv и /Rate; \n \nВведи целую часть полученной зарплаты:</b>'
     bot.send_message(message.chat.id, mess, parse_mode='html')
 
 
@@ -42,19 +42,20 @@ def get_user_text(message):
  #       print('Записали в файл')
 
     elif message.text == "/Rate":
-        bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
+        #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
+        bot.send_message(message.from_user.id, f"For 1$ u'll get: \n\nPRVA:   {get_PRVA_rates()} \u20ac \nLOVC:  {get_LOVCEN_rates()} \u20ac \nHIPO:   {get_HIPO_rates()} \u20ac \nNLB:    {get_NLB_rates()} \u20ac", parse_mode='html')
          
     else:
-        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа, введи целую часть полученной зарплаты. Также доступны команды :Srv и /Rate"'
+        mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа и некоторые команды, введи целую часть полученной зарплаты. Также доступны команды :Srv и /Rate"'
         bot.send_message(message.chat.id, mess, parse_mode='html')
         #get_year_list(2024)
-        #get_PRVA_rates()
-        #get_LOVCEN_rates()
-        #get_HIPO_rates()
-        #get_ERSTE_rates()
-        #get_NLB_rates()
-        #get_CKB_rates()
-        #get_ZIRAAT_rates()
+        get_PRVA_rates()
+        get_LOVCEN_rates()
+        get_HIPO_rates()
+        #get_ERSTE_rates() NOPE!!!
+        get_NLB_rates()
+        #get_CKB_rates() NOPE!!!
+        get_ZIRAAT_rates()
         
 
 def write_to_file():
@@ -82,13 +83,13 @@ def get_PRVA_rates():
     return rate
 
 def get_LOVCEN_rates():
-    url = "https://lovcenbanka.me/me/"
+    url = "https://www.lovcenbanka.me/banka/kursna-lista"
     response = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(response.text, 'lxml')
-    str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
+    str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'div' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
     str3 = get_rate_list(str2)
-    rate = str3[0]
+    rate = str3[16]
     return rate
 
 def get_HIPO_rates():
@@ -98,7 +99,7 @@ def get_HIPO_rates():
     str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
     str2 = "".join(line.strip() for line in str1.splitlines())
     str3 = get_rate_list(str2)
-    rate = str3[0]
+    rate = str3[2]
     return rate
 
 def get_ERSTE_rates():
