@@ -10,6 +10,7 @@ bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
 param_date=raw_date.strftime("%Y-%m-%d")
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
     mess = f'<b>{message.from_user.first_name}, тут доступны команды /srv /rate /list /rm; \n \nВведи целую часть полученной зарплаты:</b>'
@@ -54,7 +55,7 @@ def get_user_text(message):
     elif message.text == "/list":
         with open('Salary_log.txt') as f:
             contents = f.read()
-        bot.send_message(message.from_user.id, f"{contents}", parse_mode='html')
+        bot.send_message(message.from_user.id, f"{contents} \n\n{lines_left} records in the list.", parse_mode='html')
     
     elif message.text == "/rm":
         remove_last_record()
