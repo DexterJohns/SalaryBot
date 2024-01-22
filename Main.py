@@ -55,6 +55,7 @@ def get_user_text(message):
     elif message.text == "/list":
         with open('Salary_log.txt') as f:
             contents = f.read()
+        lines_left=count_lines()
         bot.send_message(message.from_user.id, f"{contents} \n\n{lines_left} records in the list.", parse_mode='html')
     
     elif message.text == "/rm":
