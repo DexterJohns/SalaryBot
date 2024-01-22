@@ -10,9 +10,6 @@ bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
 param_date=raw_date.strftime("%Y-%m-%d")
 
-
-
-
 @bot.message_handler(commands=['start'])
 def start(message):
     mess = f'<b>{message.from_user.first_name}, тут доступны команды /srv /rate /list /rm; \n \nВведи целую часть полученной зарплаты:</b>'
@@ -28,28 +25,27 @@ def get_user_text(message):
 
     
     elif mess.isdigit():
-         global salary
-         global rate
-         global data
-         salary = message.text
+        global salary
+        global rate
+        global data
+        salary = message.text
         #print (param_date)
-         base_url = "https://www.cbcg.me/en/core-functions/financial-and-banking-operations/fx-reference-rates?vazi_od=" + param_date
-         #base_url = "https://www.cbcg.me/download.php?date=" + param_date
-         print (base_url)
-         r= requests.get(base_url, verify=False, timeout=5)
-         soup = BeautifulSoup(r.content, "html.parser")
-         #print (soup)
+        base_url = "https://www.cbcg.me/en/core-functions/financial-and-banking-operations/fx-reference-rates?vazi_od=" + param_date
+        #base_url = "https://www.cbcg.me/download.php?date=" + param_date
+        print (base_url)
+        r= requests.get(base_url, verify=False, timeout=5)
+        soup = BeautifulSoup(r.content, "html.parser")
+        #print (soup)
         
-         str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
-         str2 = "".join(line.strip() for line in str1.splitlines())
-         str3 = re.search(r"(\d).(\d{5})",str2) 
-         rate = str3.group(0)
-         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary}  \nRate USD-EUR:  {rate}", parse_mode='html')
-         write_to_file()
-         print('Записали в файл')
-         
+        str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
+        str2 = "".join(line.strip() for line in str1.splitlines())
+        str3 = re.search(r"(\d).(\d{5})",str2) 
+        rate = str3.group(0)
+        write_to_file()
+        lines_left=count_lines()
+        bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary}  \nRate USD-EUR:  {rate} \n\n{lines_left} records in the /list.", parse_mode='html')
+        
 
-         
 
     elif message.text == "/rate":
         #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
@@ -62,7 +58,8 @@ def get_user_text(message):
     
     elif message.text == "/rm":
         remove_last_record()
-        bot.send_message(message.from_user.id, f"Last record was deleted", parse_mode='html')
+        lines_left=count_lines()
+        bot.send_message(message.from_user.id, f"Last record was deleted. {lines_left} records left in the /list.", parse_mode='html')
 
     else:
         mess = f'<b>{message.from_user.first_name}</b>, я понимаю только целые числа и некоторые команды, введи целую часть полученной зарплаты. Также доступны команды /srv /rate /list /rm"'
@@ -88,21 +85,25 @@ def write_to_file():
     file.write('\n')
     file.close()
 
+def count_lines():
+    with open(r"Salary_log.txt", 'r') as fp:
+    # read an store all lines into list
+        lines = fp.readlines()
+        x = len(lines)
+    return x
+
 def remove_last_record():
     with open(r"Salary_log.txt", 'r+') as fp:
     # read an store all lines into list
         lines = fp.readlines()
-        x = len(lines)
-        print(x)
-         # move file pointer to the beginning of a file
+        x = count_lines()
+        # move file pointer to the beginning of a file
         fp.seek(0)
         # truncate the file
         fp.truncate()
         # start writing lines
         # iterate line and line number
         for number, line in enumerate(lines):
-          # delete line number 5 and 8
-          # note: list index start from 0
             if number not in [x-1]:
                 fp.write(line)
 
