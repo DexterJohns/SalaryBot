@@ -53,10 +53,10 @@ def get_user_text(message):
         bot.send_message(message.from_user.id, f"For 1$ u'll get: \n\nPRVA:   {get_PRVA_rates()} \u20ac \nLOVC:  {get_LOVCEN_rates()} \u20ac \nHIPO:   {get_HIPO_rates()} \u20ac \nNLB:    {get_NLB_rates()} \u20ac", parse_mode='html')
 
     elif message.text == "/list":
-        with open('Salary_log.txt') as f:
+        with open(r"Salary_log.txt", 'r') as f:
             contents = f.read()
         lines_left=count_lines()
-        bot.send_message(message.from_user.id, f"{contents} \n\n{lines_left} records in the list.", parse_mode='html')
+        bot.send_message(message.from_user.id, f"{contents} \n\n{lines_left} records in the list. \n/rm line", parse_mode='html')
     
     elif message.text == "/rm":
         remove_last_record()
