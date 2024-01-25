@@ -1,11 +1,9 @@
 import telebot
 import requests
 import re
+import os
 from bs4 import BeautifulSoup
 import datetime
-from array import array
-from numpy import loadtxt
-
 
 HEADERS = {'User-Agent': 'Mozilla/4.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
 
@@ -14,13 +12,22 @@ raw_date = datetime.datetime.now()
 param_date=raw_date.strftime("%Y-%m-%d")
 tax_percent = 0.15                                  #This is tax in Budva
 salary_gross = 0.7                                  #This is 70% of salary in USD we should pay tax for
+current_year = datetime.datetime.now().year
+
+
+file_name = f"Salary_{current_year}.txt"
+if os.path.isfile(file_name):
+    pass
+else:
+    with open(file_name, 'w'):
+        pass
+    print(f"The file '{file_name}' has been created.")
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
     mess = f'<b>{message.from_user.first_name}, тут доступны команды /srv /rate /list /rm; \n \nВведи целую часть полученной зарплаты:</b>'
     bot.send_message(message.chat.id, mess, parse_mode='html')
-
 
 @bot.message_handler()
 def get_user_text(message):
@@ -30,7 +37,7 @@ def get_user_text(message):
         bot.send_message(message.chat.id, message, 'lxml')
     
     elif mess.isdigit():
-        global salary_usd, salary_eur, rate
+        global salary_usd, salary_eur, rate, current_year, file_name
         salary_usd = int(message.text)
         #print (param_date)
         base_url = "https://www.cbcg.me/en/core-functions/financial-and-banking-operations/fx-reference-rates?vazi_od=" + param_date
@@ -39,6 +46,7 @@ def get_user_text(message):
         r= requests.get(base_url, verify=False, timeout=5)
         soup = BeautifulSoup(r.content, "html.parser")
         #print (soup)
+        
         str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
         str2 = "".join(line.strip() for line in str1.splitlines())
         str3 = re.search(r"(\d).(\d{5})",str2) 
@@ -46,25 +54,22 @@ def get_user_text(message):
         salary_eur = int(salary_usd/rate)
         taxes= int(count_tax(salary_eur))
         write_to_file(taxes)
-        lines_left=count_lines()
+        lines_left=count_lines(file_name)
         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary_usd}  \nRate USD-EUR:   {rate} \nTaxes €:               {taxes}\n\n{lines_left} records in the /list       /rm.", parse_mode='html')
-        if lines_left % 12 == 0:
-            bot.send_message(message.from_user.id, f"Time to pay taxes.. Total taxes to pay: {sum_tax()} €", parse_mode='html')
-            
 
     elif message.text == "/rate":
         #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
         bot.send_message(message.from_user.id, f"For 1$ u'll get: \n\nPRVA:   {get_PRVA_rates()} \u20ac \nLOVC:  {get_LOVCEN_rates()} \u20ac \nHIPO:   {get_HIPO_rates()} \u20ac \nNLB:    {get_NLB_rates()} \u20ac", parse_mode='html')
 
     elif message.text == "/list":
-        with open(r"Salary_log.txt", 'r') as f:
+        with open(file_name, 'r') as f:
             contents = f.read()
-        lines_left=count_lines()
-        bot.send_message(message.from_user.id, f"{contents} \nTotal taxes: {sum_tax()} \n\n{lines_left} records in the list. \n/rm line", parse_mode='html')
+        lines_left=count_lines(file_name)
+        bot.send_message(message.from_user.id, f"{contents} \n\n{lines_left} records in the list. \n/rm line", parse_mode='html')
     
     elif message.text == "/rm":
-        remove_last_record()
-        lines_left=count_lines()
+        remove_last_record(file_name)
+        lines_left=count_lines(file_name)
         bot.send_message(message.from_user.id, f"Last record was deleted. {lines_left} records left in the /list.", parse_mode='html')
 
     else:
@@ -81,7 +86,8 @@ def get_user_text(message):
         
 
 def write_to_file(tax_2pay):
-    file = open('Salary_log.txt', "a")
+    global file_name
+    file = open(file_name, "a")
     #current_datetime = datetime.now()
     file.write(str(param_date))
     file.write('  ')
@@ -97,27 +103,18 @@ def count_tax(sal_eur):
     tax = int(sal_eur*tax_percent*salary_gross)
     return tax
 
-def sum_tax():
-    with open('Salary_log.txt', 'r') as file:
-        total_tax = 0
-        for line in file:
-            elements = line.split()
-            if len(elements) >= 4:
-                total_tax += int(elements[3])
-    return total_tax
-
-def count_lines():
-    with open(r"Salary_log.txt", 'r') as fp:
+def count_lines(file_name):
+    with open(file_name, 'r') as fp:
     # read an store all lines into list
         lines = fp.readlines()
         x = len(lines)
     return x
 
-def remove_last_record():
-    with open(r"Salary_log.txt", 'r+') as fp:
+def remove_last_record(file_name):
+    with open(file_name, 'r+') as fp:
     # read an store all lines into list
         lines = fp.readlines()
-        x = count_lines()
+        x = count_lines(file_name)
         # move file pointer to the beginning of a file
         fp.seek(0)
         # truncate the file
