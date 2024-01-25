@@ -4,8 +4,11 @@ import re
 import os
 from bs4 import BeautifulSoup
 import datetime
+from array import array
+
 
 HEADERS = {'User-Agent': 'Mozilla/4.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
+
 
 bot = telebot.TeleBot('5673337125:AAGQPKmpMk_M9kwGuqMVB5BId_87IhW7jWU')
 raw_date = datetime.datetime.now()
@@ -56,6 +59,8 @@ def get_user_text(message):
         write_to_file(taxes)
         lines_left=count_lines(file_name)
         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary_usd}  \nRate USD-EUR:   {rate} \nTaxes €:               {taxes}\n\n{lines_left} records in the /list       /rm.", parse_mode='html')
+        if lines_left % 12 == 0:
+            bot.send_message(message.from_user.id, f"Time to pay taxes.. Total taxes to pay: {sum_tax()} €", parse_mode='html')
 
     elif message.text == "/rate":
         #bot.send_message(message.from_user.id, f"PRVA:   {get_PRVA_rates()} \nLOVC:  {get_LOVCEN_rates()} \nHIPO:   {get_HIPO_rates()} \nERST:   {get_ERSTE_rates()}\nNLB:    {get_NLB_rates()}", parse_mode='html')
@@ -65,7 +70,7 @@ def get_user_text(message):
         with open(file_name, 'r') as f:
             contents = f.read()
         lines_left=count_lines(file_name)
-        bot.send_message(message.from_user.id, f"{contents} \n\n{lines_left} records in the list. \n/rm line", parse_mode='html')
+        bot.send_message(message.from_user.id, f"{contents} \nTotal taxes: {sum_tax()} \n\n{lines_left} records in the list. \n/rm line", parse_mode='html')
     
     elif message.text == "/rm":
         remove_last_record(file_name)
@@ -102,6 +107,16 @@ def write_to_file(tax_2pay):
 def count_tax(sal_eur):
     tax = int(sal_eur*tax_percent*salary_gross)
     return tax
+
+def sum_tax():
+    global file_name
+    with open(file_name, 'r') as file:
+        total_tax = 0
+        for line in file:
+            elements = line.split()
+            if len(elements) >= 4:
+                total_tax += int(elements[3])
+    return total_tax
 
 def count_lines(file_name):
     with open(file_name, 'r') as fp:
