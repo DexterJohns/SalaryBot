@@ -2,10 +2,8 @@ import telebot
 import requests
 import re
 import os
-from bs4 import BeautifulSoup
 import datetime
-from array import array
-
+from bs4 import BeautifulSoup
 
 HEADERS = {'User-Agent': 'Mozilla/4.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
 
@@ -17,8 +15,7 @@ tax_percent = 0.15                                  #This is tax in Budva
 salary_gross = 0.7                                  #This is 70% of salary in USD we should pay tax for
 current_year = datetime.datetime.now().year
 
-
-file_name = f"Salary_{current_year}.txt"
+file_name = f"Income_{current_year}.txt"
 if os.path.isfile(file_name):
     pass
 else:
@@ -37,7 +34,7 @@ def get_user_text(message):
     mess=message.text
     
     if message.text == "/srv":
-        bot.send_message(message.chat.id, message, 'lxml')
+        bot.send_message(message.chat.id, message)
     
     elif mess.isdigit():
         global salary_usd, salary_eur, rate, current_year, file_name
@@ -49,13 +46,12 @@ def get_user_text(message):
         r= requests.get(base_url, verify=False, timeout=5)
         soup = BeautifulSoup(r.content, "html.parser")
         #print (soup)
-        
         str1 = "".join(map(str,soup.find(lambda tag: tag.name == 'tr' and 'USD' in tag.text)))
         str2 = "".join(line.strip() for line in str1.splitlines())
-        str3 = re.search(r"(\d).(\d{5})",str2) 
+        str3 = re.search(r"(\d).(\d{5})",str2)
         rate = float(str3.group(0))
-        salary_eur = int(salary_usd/rate)
-        taxes= int(count_tax(salary_eur))
+        salary_eur = salary_usd/rate
+        taxes= int(salary_eur*tax_percent*salary_gross)
         write_to_file(taxes)
         lines_left=count_lines(file_name)
         bot.send_message(message.chat.id, f"Date:                   {param_date} \nSalary $:              {salary_usd}  \nRate USD-EUR:   {rate} \nTaxes €:               {taxes}\n\n{lines_left} records in the /list       /rm.", parse_mode='html')
@@ -103,10 +99,6 @@ def write_to_file(tax_2pay):
     file.write(str(tax_2pay))
     file.write('\n')
     file.close()
-
-def count_tax(sal_eur):
-    tax = int(sal_eur*tax_percent*salary_gross)
-    return tax
 
 def sum_tax():
     global file_name
